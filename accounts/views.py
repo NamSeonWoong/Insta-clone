@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UserChangeForm, PasswordChangeForm
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, CustomUserChangeForm
 from .models import User
-
+from django.contrib.auth import update_session_auth_hash
 # Create your views here.
 def signup(request):
     if request.method == "POST":
@@ -54,3 +54,47 @@ def follow(request, id):
             # me.followings.add(you)
 
     return redirect('accounts:user_page', id)
+
+    
+def delete(request,id):
+    user_info =get_object_or_404(User,id=id)
+    user = request.user
+
+    if user == user_info:
+        user.delete()
+        return redirect('posts:index')
+
+def update(request):
+    if request.method == "POST":
+        form = CustomUserChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('posts:index')
+    else:
+        form = CustomUserChangeForm(instance=request.user)
+    context = {
+        'form':form
+    }
+
+    return render(request, 'accounts/form.html', context)
+
+def password(request):
+    if request.method =="POST":
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            return redirect('posts:index')
+    else:
+        form = PasswordChangeForm(request.user)
+    context = {
+        'form':form
+    }
+    return render(request, 'accounts/form.html', context)
+
+def profile(request):
+    user = request.user
+    context = {
+        'user_info':user
+    }
+    return render(request, 'accounts/user_page.html', context)

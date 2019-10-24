@@ -1,0 +1,22 @@
+{% load make_link %}
+<div class="card col-8 my-5 text-center" >
+    <img src="{{post.image.url}}" class="card-img-top" alt="...">
+    <div class="card-body">
+      <h5 class="card-title">{{post.content}}</h5>
+      <p class="card-text">{{post|hashtag_link|safe}}</p>
+      <a href="{% url 'posts:like' post.id %}" class="btn btn-outline-secondary btn-sm">
+      {% if user in post.like_users.all %}
+          <h1 class="btn-outline-danger btn-xs">♥</h1>
+        {% else %}
+          <h1 class="btn-xs">♡</h1>
+        {% endif %}
+      </a>
+      <p class="inline">좋아요 {{post.like_users.all.count}}개</p>
+      <p class="card-text">{{post.user}} - {{post.created_at}}</p>
+      {% if request.user == post.user %}
+          <a href="{% url 'posts:post_update' post.id %}" class="d-inline text-black btn btn-info btn-sm">게시물 수정</a>
+          <a href="{% url 'posts:post_delete' post.id %}" class="d-inline btn btn-danger btn-sm">게시물 삭제</a>
+      {% endif %}
+    </div>
+  </div>
+      
